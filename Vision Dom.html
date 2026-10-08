@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Fila de Turnos - FIFO</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:system-ui;background:#0f1115;color:#e6e6e6}
+  header{background:#161a22;border-bottom:2px solid #0062ff;padding:24px;text-align:center}
+  main{max-width:1100px;margin:30px auto;display:grid;grid-template-columns:380px 1fr;gap:20px;padding:0 20px}
+  .card{background:#1a1f2b;border:1px solid #2a3243;border-radius:14px;padding:20px}
+  input{width:100%;padding:12px;border-radius:8px;border:1px solid #2a3243;background:#0f1115;color:#fff;margin-top:4px}
+  button{width:100%;margin-top:14px;padding:12px;border:none;border-radius:8px;font-weight:700;cursor:pointer}
+  .btn-add{background:#00ff88;color:#000}
+  .btn-attend{background:#1f2937;color:#00ff88;border:1px solid #00ff88}
+  .ticket{display:flex;justify-content:space-between;background:#0f1115;border-left:4px solid #00ff88;border-radius:8px;padding:12px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1 style="color:#00ff88">⚡️ FILA DE TURNOS FIFO</h1>
+  <p>Sistema de gestión de fila</p>
+</header>
+<main>
+  <div>
+    <section class="card">
+      <h2>Registrar Persona</h2>
+      <label>Nombre</label><input id="nombre" placeholder="Julian Salazar">
+      <label style="display:block;margin-top:10px">Cédula</label><input id="cedula" placeholder="1054...">
+      <button class="btn-add" onclick="registrar()">AGREGAR A LA FILA</button>
+    </section>
+    <section class="card" style="margin-top:20px">
+      <h2>Turno Actual</h2>
+      <div id="turnoActual" style="padding:20px;text-align:center;opacity:.5">Fila vacía</div>
+      <button class="btn-attend" id="btnAtender" onclick="atender()" disabled>ATENDER SIGUIENTE</button>
+    </section>
+  </div>
+  <section class="card">
+    <h2>Fila Completa</h2>
+    <div id="listaFila">No hay personas</div>
+  </section>
+</main>
+<script>
+class Persona{
+  constructor(nombre,cedula){
+    this.nombre=nombre; this.cedula=cedula;
+    this.hora=new Date().toLocaleTimeString()
+  }
+}
+class FilaTurnos{
+  constructor(){this.fila=[]}
+  encolar(p){this.fila.push(p)}
+  desencolar(){return this.fila.shift()}
+}
+const gestor=new FilaTurnos()
+function registrar(){
+  const n=document.getElementById('nombre').value.trim()
+  const c=document.getElementById('cedula').value.trim()
+  if(!n||!c)return alert('Llena todo')
+  gestor.encolar(new Persona(n,c))
+  document.getElementById('nombre').value=''; document.getElementById('cedula').value=''
+  render()
+}
+function atender(){gestor.desencolar();render()}
+function render(){
+  const lista=document.getElementById('listaFila')
+  const turno=document.getElementById('turnoActual')
+  const btn=document.getElementById('btnAtender')
+  btn.disabled=gestor.fila.length===0
+  if(gestor.fila.length===0){
+    lista.innerHTML='No hay personas'; turno.innerHTML='Fila vacía'; return
+  }
+  turno.innerHTML=`<b style="color:#00ff88;font-size:24px">#1 - ${gestor.fila[0].nombre}</b><br>${gestor.fila[0].cedula}`
+  lista.innerHTML=gestor.fila.map((p,i)=>`<div class="ticket"><div><b>#${i+1} ${p.nombre}</b><br><small>${p.cedula} - ${p.hora}</small></div></div>`).join('')
+}
+</script>
+</body>
+</html>
